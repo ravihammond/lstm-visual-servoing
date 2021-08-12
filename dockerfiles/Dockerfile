@@ -1,3 +1,5 @@
 FROM ros:noetic-robot
-RUN echo hello
-RUN echo world
+
+SHELL ["/bin/bash", "-c"]
+
+WORKDIR /app
