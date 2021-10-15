@@ -1,0 +1,16 @@
+FROM cuda-ros-noetic-desktop-full
+
+SHELL ["/bin/bash", "-c"]
+
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y -qq\
+    libcanberra-gtk-module \
+    libcanberra-gtk3-module \
+    build-essential \
+    usbutils \
+    udev \
+    cheese
+
+RUN echo "source /root/setup_script.bash" >> /root/.bashrc
+
+ENTRYPOINT /bin/bash
