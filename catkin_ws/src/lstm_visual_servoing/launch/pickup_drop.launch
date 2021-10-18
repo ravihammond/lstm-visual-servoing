@@ -1,0 +1,8 @@
+<launch>
+    <!--<node pkg="lstm_visual_servoing" name="run" type="run.py" output="screen" args="models/pickup_drop"/>-->
+    <node pkg="lstm_visual_servoing" name="state_machine" type="state_machine.py" output="screen"/>
+    <node pkg="ros_ur_driver" name="driver" type="ur_driver_lite.py" output="screen"/>
+    <include file="/home/ur/ravi/catkin_ws/src/realsense/realsense2_camera/launch/rs_rgbd.launch">
+    </include>
+</launch>
+

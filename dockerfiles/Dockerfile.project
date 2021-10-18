@@ -11,6 +11,14 @@ RUN apt-get update && apt-get install -y -qq\
     udev \
     cheese
 
+RUN apt install -y \
+    python3-pip
+
+COPY requirements.txt /opt/app/requirements.txt
+WORKDIR /opt/app
+RUN pip install -r requirements.txt
+COPY . /opt/app
+
 RUN echo "source /root/setup_script.bash" >> /root/.bashrc
 
 ENTRYPOINT /bin/bash
