@@ -14,10 +14,23 @@ RUN apt-get update && apt-get install -y -qq\
 RUN apt install -y \
     python3-pip
 
+RUN pip install torch torchvision torchaudio
+
 COPY requirements.txt /opt/app/requirements.txt
 WORKDIR /opt/app
 RUN pip install -r requirements.txt
 COPY . /opt/app
+
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE 
+RUN apt-get install -y software-properties-common
+RUN add-apt-repository -y "deb https://librealsense.intel.com/Debian/apt-repo $(lsb_release -cs) main" -u
+RUN apt-get -y install librealsense2-dkms
+RUN apt-get -y install librealsense2-utils
+RUN apt-get -y install librealsense2-dev
+RUN apt-get install librealsense2-dbg
+RUN apt-get -y install ros-noetic-realsense2-camera
+RUN apt-get -y install ros-noetic-rgbd-launch
+RUN apt-get -y install ros-noetic-joy
 
 RUN echo "source /root/setup_script.bash" >> /root/.bashrc
 

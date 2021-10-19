@@ -23,7 +23,7 @@ docker run -it \
     --volume=$xsock:$xsock:rw \
     --volume=$xauth:$xauth:rw \
     --env=XAUTHORITY=$xauth \
-    --device /dev/video0 \
+    --device=/dev \
     --network=host \
     --workdir=/root/catkin_ws \
     --cpus=$cpus \

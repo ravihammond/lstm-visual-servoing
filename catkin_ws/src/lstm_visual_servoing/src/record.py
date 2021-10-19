@@ -71,9 +71,12 @@ class Recorder():
         # Meta data for all data in file
         self._total_meta = self.get_total_meta()
 
+        # Image from camera feed
+        self._img = None
+
         # All fonts for recording panel text
-        font_regular = "/usr/share/fonts/truetype/roboto/hinted/Roboto-Regular.ttf"
-        font_bold = "/usr/share/fonts/truetype/roboto/hinted/Roboto-Bold.ttf"
+        font_regular = "/root/catkin_ws/fonts/Roboto-Regular.ttf"
+        font_bold = "/root/catkin_ws/fonts/Roboto-Bold.ttf"
         self._font_title = ImageFont.truetype(font_bold, 40)
         self._font_title_med = ImageFont.truetype(font_bold, 30)
         self._font_title_small = ImageFont.truetype(font_bold, 27)
@@ -108,21 +111,22 @@ class Recorder():
 
     def record(self):
         # cv2.namedWindow("Recorder", cv2.WINDOW_OPENGL)
-        cv2.namedWindow("Recorder")
+        cv2.namedWindow("Recorder", 0)
         r = rospy.Rate(self._frame_rate)
 
         # Loop while ros is not shutdown, and the cv2 window is open
-        while not rospy.is_shutdown() and cv2.getWindowProperty("Recorder", cv2.WND_PROP_VISIBLE) == 1.0:
+        while not rospy.is_shutdown():
+        # while not rospy.is_shutdown() and cv2.getWindowProperty("Recorder", cv2.WND_PROP_VISIBLE) == 1.0:
             if self._img is not None:
                 img_crop = self.get_cropped_image()
                 img_show = cv2.resize(img_crop.copy(), (0,0), fx=1.4, fy=1.4)
 
                 # Normal state
-                if self._recording_state is 0:
+                if self._recording_state == 0:
                     img_show = self.normal_overlay(img_show)
 
                 # Recording state
-                elif self._recording_state is 1:
+                elif self._recording_state == 1:
                     # Stop recording when maximum number of frames is reached
                     self._seq_meta['frames'] += 1
                     self._seq_meta['time'] = time.time() - self._record_start_time
@@ -149,7 +153,7 @@ class Recorder():
                     self._recorded_velocities.append(csv_save_list)
 
                 # Saving state
-                elif self._recording_state is 2:
+                elif self._recording_state == 2:
                     img_show = self.saving_overlay(img_show)
 
                 #show the image to the user
@@ -169,9 +173,9 @@ class Recorder():
         # Crop a square image out the center of the rectangular one
         h,w,c = self._img.shape
         s = min(h,w)
-        x1 = (w-s)/2
+        x1 = (w-s)//2
         x2 = x1 + s
-        y1 = (h-s)/2
+        y1 = (h-s)//2
         y2 = y1 + s
         img_crop= self._img[y1:y2,x1:x2,:]
 
@@ -308,9 +312,9 @@ class Recorder():
 
     # Handle recorder control messages 
     def recorder_callback(self, msg):
-        if self._recording_state is 0 and msg.record:
+        if self._recording_state == 0 and msg.record:
             self.start_recording()
-        elif self._recording_state is 2:
+        elif self._recording_state == 2:
             if msg.save:
                 self.save_option_pressed(True)
             if msg.clear:
@@ -350,10 +354,10 @@ def check_training_directory(directory):
 if __name__ == "__main__" :
     # Argument parsing gets image directory, training data directory, and window size
     parser = argparse.ArgumentParser()
-    parser.add_argument("training", help="name of directory to save recorded training data to")
+    parser.add_argument("-t","--training", dest="training", type=str, default="training_data", help="name of directory to save recorded training data to")
     parser.add_argument("-f", "--frames", dest="frames", type=int, default=1000, help="automatically stops recording after given number of frames")
     parser.add_argument("-p", "--prefix", dest="prefix", type=str, default="", help="string to add to end of sequence directory")
-    args = parser.parse_args()
+    args = parser.parse_known_args()[0]
 
     training_dir = check_training_directory(args.training)
 

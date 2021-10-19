@@ -1,13 +1,14 @@
 <launch>
-    <!--<node pkg="lstm_visual_servoing" name="record" type="record.py" output="screen"/>-->
+    <arg name="training" default="training_data"/>
+    <arg name="frames" default="1000"/>
+    <arg name="prefix" default=""/>
+    <node pkg="lstm_visual_servoing" name="record" type="record.py" output="screen"
+          args="-t $(arg training) -f $(arg frames) -p $(arg prefix)" />
     <node pkg="lstm_visual_servoing" name="state_machine" type="state_machine.py" output="screen"/>
-    <!--
+    <node pkg="lstm_visual_servoing" name="driver" type="ur_driver_lite.py" output="screen"/>
     <node pkg="lstm_visual_servoing" name="user_input" type="user_input.py" output="screen"/>
-    <node pkg="ros_ur_driver" name="driver" type="ur_driver_lite.py" output="screen"/>
     <rosparam param="joy_node/dev">"/dev/input/js0"</rosparam>
     <node pkg="joy" name="joystick" type="joy_node"/>
-    <include file="/home/ur/ravi/catkin_ws/src/realsense/realsense2_camera/launch/rs_rgbd.launch">
-    </include>
-    -->
+    <include file="$(find realsense2_camera)/launch/rs_rgbd.launch"/>
 </launch>
 
