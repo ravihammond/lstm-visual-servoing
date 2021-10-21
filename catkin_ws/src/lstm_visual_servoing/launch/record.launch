@@ -1,7 +1,7 @@
 <launch>
-    <arg name="training" default="training_data"/>
+    <arg name="training"/>
     <arg name="frames" default="1000"/>
-    <arg name="prefix" default=""/>
+    <arg name="prefix"/>
     <node pkg="lstm_visual_servoing" name="record" type="record.py" output="screen"
           args="-t $(arg training) -f $(arg frames) -p $(arg prefix)" />
     <node pkg="lstm_visual_servoing" name="state_machine" type="state_machine.py" output="screen"/>

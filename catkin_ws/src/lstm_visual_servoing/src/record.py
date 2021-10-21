@@ -38,7 +38,7 @@ class Recorder():
         # Number of frames to reach before recording is stopped
         self._max_frames = max_frames
         # Name of directory to save temporary images to
-        self._temp_dir = self._training_dir + "temp/"
+        self._temp_dir = os.path.join(self._training_dir, "temp/")
         # frame rate of robot and recorder (Hz)
         self._frame_rate = 20
 
@@ -116,7 +116,6 @@ class Recorder():
 
         # Loop while ros is not shutdown, and the cv2 window is open
         while not rospy.is_shutdown():
-        # while not rospy.is_shutdown() and cv2.getWindowProperty("Recorder", cv2.WND_PROP_VISIBLE) == 1.0:
             if self._img is not None:
                 img_crop = self.get_cropped_image()
                 img_show = cv2.resize(img_crop.copy(), (0,0), fx=1.4, fy=1.4)
@@ -138,7 +137,7 @@ class Recorder():
 
                     # Filenames for current image and velocities being saved
                     frame_filename = "%06d.png" % self._seq_meta['frames']
-                    frame_path = self._temp_dir + frame_filename
+                    frame_path = os.path.join(self._temp_dir, frame_filename)
 
                     # Resize images to resnet size
                     img_resized = cv2.resize(img_crop, (224, 224))
@@ -147,10 +146,12 @@ class Recorder():
                     camera_t, camera_r = self._tf_listener.lookupTransform(
                         'base','camera_color_optical_frame', rospy.Time())
                     csv_save_list = self._control_message + camera_t
+                    print("writing frame to path: ", frame_path)
 
                     # Save current frame and velocities
                     cv2.imwrite(frame_path, img_resized)
                     self._recorded_velocities.append(csv_save_list)
+                    print("writing image to: ", frame_path)
 
                 # Saving state
                 elif self._recording_state == 2:
@@ -270,13 +271,16 @@ class Recorder():
     def save_current_sequence(self):
         # Save recording information
         self.update_meta_data()
+        new_training_dir = os.path.join(self._training_dir, 
+                self._time + "_" +
+                self._sequence_save_prefix)
 
         # Rename temp directory
         if os.path.exists(self._temp_dir):
-            os.rename(self._temp_dir, self._training_dir + self._time + self._sequence_save_prefix)
+            os.rename(self._temp_dir, new_training_dir)
 
         # Write recorded velocities to file
-        vel_path = os.path.join(self._training_dir, self._time + self._sequence_save_prefix, self._vel_filename)
+        vel_path = os.path.join(new_training_dir, self._vel_filename)
         with open(vel_path, 'w') as csv_file:  
             csv.writer(csv_file, delimiter=',').writerows(self._recorded_velocities)
 
@@ -334,18 +338,11 @@ class Recorder():
 
 # Ensures the training data directory exists
 def check_training_directory(directory):
-    directory = directory.strip('/') + '/'
-
     # Ensures training data directory exists
     if not os.path.exists(directory):
+        print("training data directory doesn't exist")
         os.makedirs(directory)
         return directory
-
-    # ask if you want to add to the contents of directory if not empty
-    if len(os.listdir(directory)) > 0:
-        query = "Directory: " + directory + " already contains training data, would you like to add to it?"
-        if not query_yes_no(query):
-            sys.exit()
 
     return directory
 
@@ -354,13 +351,16 @@ def check_training_directory(directory):
 if __name__ == "__main__" :
     # Argument parsing gets image directory, training data directory, and window size
     parser = argparse.ArgumentParser()
-    parser.add_argument("-t","--training", dest="training", type=str, default="training_data", help="name of directory to save recorded training data to")
+    parser.add_argument("-t","--training", dest="training", type=str, default="default_data", help="name of directory to save recorded training data to")
     parser.add_argument("-f", "--frames", dest="frames", type=int, default=1000, help="automatically stops recording after given number of frames")
     parser.add_argument("-p", "--prefix", dest="prefix", type=str, default="", help="string to add to end of sequence directory")
     args = parser.parse_known_args()[0]
+    print("prefix")
+    print(args.prefix)
 
-    training_dir = check_training_directory(args.training)
+    home_path = r"/root/catkin_ws/training_data/"
+    training_dir = os.path.join(home_path, args.training)
+    training_dir = check_training_directory(training_dir)
 
     recorder = Recorder(training_dir, args.frames, args.prefix)
     recorder.record()
-

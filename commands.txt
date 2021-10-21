@@ -1,0 +1,1 @@
+roslaunch lstm_visual_servoing record.launch training:="test" prefix:="something"
