@@ -19,16 +19,13 @@ class ControlLoss():
         norm2_v = torch.norm(input2_v,p=2,dim=1)
         norm2_r = torch.norm(input2_r,p=2,dim=1)
 
-
         cos_sim_v = 1.0-self.cos_sim(input1_v,input2_v)
         cos_sim_v *= (norm1_v > 0.01).float() * (norm2_v > 0.01).float()
-        dist_v = self.p_dist(input1_v,input2_v).squeeze_()
-
+        dist_v = self.p_dist(input1_v,input2_v)
 
         cos_sim_r = 1.0-self.cos_sim(input1_r,input2_r)
         cos_sim_r *= (norm1_r > 0.01).float() * (norm2_r > 0.01).float()
-        dist_r = self.p_dist(input1_r,input2_r).squeeze_()
-
+        dist_r = self.p_dist(input1_r,input2_r)
 
         loss_v = 0.9*cos_sim_v + 0.1 * dist_v
         loss_r = 0.9*cos_sim_r + 0.1 * dist_r

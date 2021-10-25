@@ -7,19 +7,17 @@ import csv
 import shutil
 
 from utils import query_yes_no
-from pytorch import TrainManager
+from pytorch.train_manager import TrainManager
 
 # Check validity of training data
 def check_training_directory(training_dir):
-    training_dir = training_dir.strip('/') + '/'
-
     # Ensures training data directory exists
     if not os.path.exists(training_dir):
         os.makedirs(training_dir)
 
     # Checks that the training data is not empty
     dir_files = os.listdir(training_dir)
-    if len(dir_files) is 0:
+    if len(dir_files) == 0:
         sys.exit("Error: Directory %s is empty" % training_dir)
 
 
@@ -63,15 +61,13 @@ def check_training_directory(training_dir):
         valid_sequences.append(seq_path)
 
     # Exit if the training directory contains no valid sequences
-    if len(valid_sequences) is 0:
+    if len(valid_sequences) == 0:
         sys.exit("Error: no valid sequences in directory")
 
     return training_dir, valid_sequences
 
 # Check validity of model directory
 def check_model_directory(model_dir):
-    model_dir = model_dir.strip('/') + '/'
-
     # Ensures training data directory exists
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)

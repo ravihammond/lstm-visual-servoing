@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 import argparse
 import sys
 import os
@@ -7,14 +7,12 @@ from pytorch import VisualServo
 
 # Check validity of model directory
 def check_model_directory(model_dir):
-    model_dir = model_dir.strip('/') + '/'
-
     # Ensures training data directory exists
     if not os.path.exists(model_dir):
         sys.exit("Error: model directory %s does not exist")
 
     # model_path = os.path.join(model_dir, "model.pt")
-    model_path = os.path.join(model_dir, "model_50.pt")
+    model_path = os.path.join(model_dir, "best_model.pt")
 
     # Ensures training data directory exists
     if not os.path.exists(model_path):
@@ -26,10 +24,12 @@ def check_model_directory(model_dir):
 if __name__ == "__main__" :
     # Argument parser gets the model directory
     parser = argparse.ArgumentParser()
-    parser.add_argument("model", help="name of directory to load model from")
-    args = parser.parse_args()
+    parser.add_argument("-m", "--model", dest="model", help="name of directory to load model from")
+    args = parser.parse_known_args()[0]
 
-    model_path = check_model_directory(args.model)
+    home_path = r"/root/catkin_ws/models/"
+    training_dir = os.path.join(home_path, args.model)
+    model_path = check_model_directory(training_dir)
 
     visual_servo = VisualServo(model_path)
     visual_servo.run()

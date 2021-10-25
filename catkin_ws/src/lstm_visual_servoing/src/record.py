@@ -355,8 +355,6 @@ if __name__ == "__main__" :
     parser.add_argument("-f", "--frames", dest="frames", type=int, default=1000, help="automatically stops recording after given number of frames")
     parser.add_argument("-p", "--prefix", dest="prefix", type=str, default="", help="string to add to end of sequence directory")
     args = parser.parse_known_args()[0]
-    print("prefix")
-    print(args.prefix)
 
     home_path = r"/root/catkin_ws/training_data/"
     training_dir = os.path.join(home_path, args.training)

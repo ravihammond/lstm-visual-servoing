@@ -60,7 +60,7 @@ class SequenceDataset(data.Dataset):
                 frame_count = len(data) - 1
 
             # Number of sequences
-            num_seq = frame_count / self._pref_seq_length
+            num_seq = frame_count // self._pref_seq_length
 
             # If current seq length <= preffered seq length, only add one sequence
             if num_seq == 0:

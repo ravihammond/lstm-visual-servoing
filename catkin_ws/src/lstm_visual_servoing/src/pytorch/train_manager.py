@@ -1,4 +1,4 @@
-#!/usr/bin/env python -W ignore::DeprecationWarning
+#!/usr/bin/env python3
 from __future__ import print_function
 
 import torch
@@ -6,7 +6,6 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.optim import lr_scheduler
 from torch.utils.data import DataLoader
-from torch.autograd import Variable
 import torchvision
 from torchvision import datasets, models, transforms
 
@@ -19,9 +18,9 @@ import copy
 import sys
 import pprint
 
-from dataset import SequenceDataset
-from model import LSTMController
-from control_loss import ControlLoss
+from .dataset import SequenceDataset
+from .model import LSTMController
+from .control_loss import ControlLoss
 
 class TrainManager():
     def __init__(self, training_dir=None, models_dir=None, split=None, epochs=None, seq_paths=[]):
@@ -35,7 +34,7 @@ class TrainManager():
         self._lr = 0.0001
         self._hidden_dim = 2000
         self._middle_out_dim = 500
-        self._pref_seq_length = 700
+        self._pref_seq_length = 2
         self._avg_pool = False
 
         self._plot_title = "seqlen: %d, h: %d, lr: %f, mid: %d, avgpool: %s" % (
@@ -51,7 +50,6 @@ class TrainManager():
         random.shuffle(self._seq_paths)
         threshold = int(len(self._seq_paths) * self._split)
 
-        
         partitions = {'train': self._seq_paths[threshold:],
                      'val': self._seq_paths[:threshold]}
 
@@ -88,7 +86,7 @@ class TrainManager():
         val_loss_list = []
 
         for epoch in range(self._epochs):
-           # Set model to training mode
+            # Set model to training mode
             self._model.train()  
             t = time.time() - since
 
@@ -96,10 +94,10 @@ class TrainManager():
 
             # Iterate over data.
             for i, (X_img, X_coords, y_vel, y_claw) in enumerate(self._dataloaders['train']):
-                X_img = Variable(torch.squeeze(X_img)).cuda()
-                X_coords = Variable(torch.squeeze(X_coords)).cuda()
-                y_vel = Variable(torch.squeeze(y_vel)).cuda()
-                y_claw = Variable(torch.squeeze(y_claw)).cuda()
+                X_img = torch.squeeze(X_img).cuda()
+                X_coords = torch.squeeze(X_coords).cuda()
+                y_vel = torch.squeeze(y_vel).cuda()
+                y_claw = torch.squeeze(y_claw).reshape((2,1)).cuda()
 
                 optimizer.zero_grad()
                 self._model.init_hidden()
@@ -108,7 +106,6 @@ class TrainManager():
 
                 loss_vel = self.vel_criterion(out_vel, y_vel)
                 loss_claw = self.claw_criterion(out_claw, y_claw)
-                # print(loss_vel.data[0], loss_claw.data[0])
                 loss = loss_vel + loss_claw
 
                 loss.backward(retain_graph=True)
@@ -116,7 +113,7 @@ class TrainManager():
 
                 print("[Epoch: %d/%d, Sample: %0.2f%%] loss: %0.4f, time: %s      " % (
                     epoch + 1, self._epochs, (float(i + 1) / self._dataset_sizes["train"]) * 100, 
-                    loss[0], self.get_time(time.time() - since)), end='\r')
+                    loss.item(), self.get_time(time.time() - since)), end='\r')
                 sys.stdout.flush()
 
             # print training and validation loss
@@ -144,10 +141,10 @@ class TrainManager():
         loss = 0.0
         self._model.eval()  
         for i, (X_img, X_coords, y_vel, y_claw) in enumerate(self._dataloaders[phase]):
-            X_img = Variable(torch.squeeze(X_img), volatile=True).cuda()
-            X_coords = Variable(torch.squeeze(X_coords), volatile=True).cuda()
-            y_vel = Variable(torch.squeeze(y_vel), volatile=True).cuda()
-            y_claw = Variable(torch.squeeze(y_claw), volatile=True).cuda()
+            X_img = torch.squeeze(X_img).cuda()
+            X_coords = torch.squeeze(X_coords).cuda()
+            y_vel = torch.squeeze(y_vel).cuda()
+            y_claw = torch.squeeze(y_claw).reshape((2, 1)).cuda()
 
             self._model.init_hidden()
             out_vel, out_claw = self._model(X_img, X_coords)
@@ -161,7 +158,7 @@ class TrainManager():
                 ' ' * 20), end='\r')
             sys.stdout.flush()
 
-        return (loss / self._dataset_sizes[phase]).data[0]
+        return (loss / self._dataset_sizes[phase]).item()
 
     def plot_loss(self, train_loss_list, val_loss_list):
         plt.cla()

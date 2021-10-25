@@ -1,5 +1,5 @@
 import torch
-from torch.autograd import Variable
+torch.autograd.set_detect_anomaly(True)
 import torch.nn as nn
 import torchvision
 from torchvision import models
@@ -24,8 +24,8 @@ class LSTMController(nn.Module):
         self._sigmoid = nn.Sigmoid()
 
     def init_hidden(self):
-        self._hidden = (Variable(torch.zeros(1, 1, self._hidden_dim).cuda()),
-                       Variable(torch.zeros(1, 1, self._hidden_dim).cuda()))
+        self._hidden = (torch.zeros(1, 1, self._hidden_dim).cuda(),
+                        torch.zeros(1, 1, self._hidden_dim).cuda())
 
     def init_resnet(self, cutoff):
         res18_model = models.resnet18(pretrained=True)
