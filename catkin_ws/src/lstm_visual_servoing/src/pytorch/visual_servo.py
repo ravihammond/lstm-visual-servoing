@@ -73,10 +73,6 @@ class VisualServo():
                 X_coords = torch.FloatTensor(np_coords).cuda()
 
                 y_vel, y_claw = self._model(X_img, X_coords)
-                print("y_vel")
-                print(y_vel.cpu().data)
-                print("y_claw")
-                print(y_claw.cpu().data)
                 np_vel = np.squeeze(np.array(y_vel.cpu().data))
                 np_claw = np.squeeze(np.array(y_claw.cpu().data))
 

@@ -93,7 +93,6 @@ class StateMachine:
             r.sleep()
 
     def get_safety_return_speeds(self,camera_t, camera_r):
-
         safe_trans_v = [0.0,0.0,0.0]
         safe_rot_v = np.array([0.0,0.0,0.0])
 
@@ -125,7 +124,14 @@ class StateMachine:
         #normalise pan rotation axis
         pan_axis /= np.linalg.norm(pan_axis)
 
-        pan_return_speed = min(full_rot_speed,max(0,(pan_angle-pan_angle_limit)/full_rot_speed_dist*full_rot_speed))
+        pan_return_speed = min(
+            full_rot_speed,
+            max(
+                0,
+                (pan_angle - pan_angle_limit) / full_rot_speed_dist * full_rot_speed
+            )
+        )
+        print(f"{pan_return_speed=}")
 
         safe_rot_v += pan_axis * pan_return_speed
 

@@ -1,3 +1,3 @@
-roslaunch lstm_visual_servoing record.launch training:="test" prefix:="something"
+roslaunch lstm_visual_servoing record.launch training:="pickup_place" prefix:="start"
 python3 train.py ~/catkin_ws/training_data/test/ ~/catkin_ws/models/
-roslaunch lstm_visual_servoing pickup_drop.launch model:="best_model"
+roslaunch lstm_visual_servoing pickup_drop.launch model:="test_model"
