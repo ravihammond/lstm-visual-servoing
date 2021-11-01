@@ -146,12 +146,10 @@ class Recorder():
                     camera_t, camera_r = self._tf_listener.lookupTransform(
                         'base','camera_color_optical_frame', rospy.Time())
                     csv_save_list = self._control_message + camera_t
-                    print("writing frame to path: ", frame_path)
 
                     # Save current frame and velocities
                     cv2.imwrite(frame_path, img_resized)
                     self._recorded_velocities.append(csv_save_list)
-                    print("writing image to: ", frame_path)
 
                 # Saving state
                 elif self._recording_state == 2:

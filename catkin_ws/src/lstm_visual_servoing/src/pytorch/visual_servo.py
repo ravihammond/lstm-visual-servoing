@@ -1,5 +1,8 @@
 #!/usr/bin/env python2
 import torch
+torch.cuda.set_device(0)
+
+# map_location='cuda:0'
 import rospy
 import tf
 
@@ -24,7 +27,7 @@ class VisualServo():
 
         self._img_rgb = None
 
-        self._model = torch.load(model_path)
+        self._model = torch.load(model_path, map_location='cuda:0')
 
         self._model.eval()
         self._model.cuda()

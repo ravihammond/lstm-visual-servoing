@@ -131,9 +131,7 @@ class StateMachine:
                 (pan_angle - pan_angle_limit) / full_rot_speed_dist * full_rot_speed
             )
         )
-        print(f"{pan_return_speed=}")
-
-        safe_rot_v += pan_axis * pan_return_speed
+        safe_rot_v += pan_axis * pan_return_speed * 0.5
 
         #TILT LIMIT
         out_norm = np.array([camera_t[0],camera_t[1],0.0])
@@ -147,24 +145,28 @@ class StateMachine:
             tilt_angle = math.pi - tilt_angle
         tilt_angle *= tilt_sign_y
 
-
         tilt_angle_min = math.radians(-40)
         tilt_raw = -80
         tilt_angle_max = math.radians(tilt_raw)
         dist = math.sqrt(camera_t[0]**2 + camera_t[1]**2)
         tilt_lock = 0.75
         tilt_lock_max = 0.92
+        # if dist < tilt_lock and camera_t[2] < 0.4:
+            # tilt_angle_min = -1.3
         if dist > tilt_lock:
             percent = (dist - tilt_lock) / (tilt_lock_max - tilt_lock)
             tilt_angle_max = math.radians(tilt_raw + ((-62-tilt_raw) * percent))
+
+        # print(f"tilt angle min: {tilt_angle_min}, tilt angle max: {tilt_angle_max}")
+        # print("camera: ", camera_t)
 
         tilt_return_speed = -min(full_rot_speed,max(0,
             (tilt_angle-tilt_angle_max)/full_rot_speed_dist*full_rot_speed))
         tilt_return_speed += min(full_rot_speed,max(0,
             (tilt_angle_min-tilt_angle)/full_rot_speed_dist*full_rot_speed))
 
-        # tilt_return_speed
-        safe_rot_v -= v_plane_norm * tilt_return_speed
+        # tilt_return_spee
+        safe_rot_v -= v_plane_norm * tilt_return_speed * 0.5
 
         #LOOK UP
         if tilt_angle > -math.pi/4 and tilt_angle < math.pi/4:

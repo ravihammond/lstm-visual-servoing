@@ -1,6 +1,6 @@
 <launch>
     <arg name="training"/>
-    <arg name="frames" default="5000"/>
+    <arg name="frames" default="20"/>
     <arg name="prefix"/>
     <node pkg="lstm_visual_servoing" name="record" type="record.py" output="screen"
           args="-t $(arg training) -f $(arg frames) -p $(arg prefix)" />
@@ -8,7 +8,7 @@
     <node pkg="lstm_visual_servoing" name="driver" type="ur_driver_lite.py" output="screen"/>
     <node pkg="lstm_visual_servoing" name="user_input" type="user_input.py" output="screen"/>
     <rosparam param="joy_node/dev">"/dev/input/js0"</rosparam>
-    <node pkg="joy" name="joystick" type="joy_node"/>
     <include file="$(find realsense2_camera)/launch/rs_rgbd.launch"/>
+    <node pkg="joy" name="joystick" type="joy_node"/>
 </launch>
 

@@ -14,11 +14,9 @@ class UserInput:
         self.record_pub = rospy.Publisher("record_enabled",lstm_visual_servoing.msg.Recorder,queue_size=10)
 
         self._claw_state = "open"
-        print("User Input Spinning")
-        self.spin()
-
 
     def spin(self):
+        print("User Input Spinning")
         # Create blank message
         self.ctrl_msg = lstm_visual_servoing.msg.Control()
         self.record_msg = lstm_visual_servoing.msg.Recorder()
@@ -80,5 +78,6 @@ def deadband(var,band=0.2):
     return 0.0
 
 if __name__ == "__main__":
-    UserInput()
+    user_input = UserInput()
+    user_input.spin()
 
