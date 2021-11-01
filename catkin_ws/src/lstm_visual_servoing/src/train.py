@@ -105,7 +105,7 @@ if __name__ == "__main__" :
     parser = argparse.ArgumentParser()
     parser.add_argument("training", help="name of directory to load training data from")
     parser.add_argument("models", help="name of directory to save model into")
-    parser.add_argument("-e", "--epochs", dest="epochs", type=int, default=20, help="number of epochs")
+    parser.add_argument("-e", "--epochs", dest="epochs", type=int, default= 300, help="number of epochs")
     parser.add_argument("-s", "--split", dest="split", type=float, default=0.2, help="percentage of data for validation and test set")
     args = parser.parse_args()
 

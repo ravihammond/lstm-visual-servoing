@@ -8,6 +8,7 @@ from torch.optim import lr_scheduler
 from torch.utils.data import DataLoader
 import torchvision
 from torchvision import datasets, models, transforms
+torch.cuda.set_device(2)
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -30,17 +31,19 @@ class TrainManager():
         self._epochs = epochs
         self._seq_paths = seq_paths
 
-        self._num_workers = 3
+        self._num_workers = 4
         self._lr = 0.0001
         self._hidden_dim = 2000
         self._middle_out_dim = 500
-        self._pref_seq_length = 2
+        self._pref_seq_length = 700
         self._avg_pool = False
+        self._lstm_layers = 2
 
-        self._plot_title = "seqlen: %d, h: %d, lr: %f, mid: %d, avgpool: %s" % (
-                self._pref_seq_length, self._hidden_dim, self._lr, self._middle_out_dim,
-                "True" if self._avg_pool else "False")
-        self._model = LSTMController(self._hidden_dim, self._middle_out_dim, self._avg_pool).cuda()
+        self._plot_title = "seqlen: %d, layers: %d, h: %d, lr: %f, mid: %d" % (
+                self._pref_seq_length, self._lstm_layers,
+                self._hidden_dim, self._lr, self._middle_out_dim)
+        self._model = LSTMController(self._hidden_dim, self._middle_out_dim,
+                self._avg_pool, self._lstm_layers).cuda()
         self._dataloaders = {}
         self._dataset_sizes = {}
         self._dataset_names = ['train', 'val']
@@ -75,6 +78,7 @@ class TrainManager():
     def train_model(self):
         # self.vel_criterion = nn.MSELoss()
         self.vel_criterion = ControlLoss()
+        # self.claw_criterion = nn.MSELoss()
         self.claw_criterion = nn.MSELoss()
 
         optimizer = optim.Adam(filter(lambda p: p.requires_grad, self._model.parameters()), lr=self._lr)
@@ -97,7 +101,7 @@ class TrainManager():
                 X_img = torch.squeeze(X_img).cuda()
                 X_coords = torch.squeeze(X_coords).cuda()
                 y_vel = torch.squeeze(y_vel).cuda()
-                y_claw = torch.squeeze(y_claw).reshape((2,1)).cuda()
+                y_claw = torch.squeeze(y_claw).cuda()
 
                 optimizer.zero_grad()
                 self._model.init_hidden()
@@ -108,7 +112,7 @@ class TrainManager():
                 loss_claw = self.claw_criterion(out_claw, y_claw)
                 loss = loss_vel + loss_claw
 
-                loss.backward(retain_graph=True)
+                loss.backward()
                 optimizer.step()
 
                 print("[Epoch: %d/%d, Sample: %0.2f%%] loss: %0.4f, time: %s      " % (
@@ -138,27 +142,27 @@ class TrainManager():
         print('Training complete in %s     ' % self.get_time(time.time() - since))
 
     def test(self, phase, since):
-        loss = 0.0
-        self._model.eval()  
-        for i, (X_img, X_coords, y_vel, y_claw) in enumerate(self._dataloaders[phase]):
-            X_img = torch.squeeze(X_img).cuda()
-            X_coords = torch.squeeze(X_coords).cuda()
-            y_vel = torch.squeeze(y_vel).cuda()
-            y_claw = torch.squeeze(y_claw).reshape((2, 1)).cuda()
+        with torch.no_grad():
+            loss = 0.0
+            self._model.eval()  
+            for i, (X_img, X_coords, y_vel, y_claw) in enumerate(self._dataloaders[phase]):
+                X_img = torch.squeeze(X_img).cuda()
+                X_coords = torch.squeeze(X_coords).cuda()
+                y_vel = torch.squeeze(y_vel).cuda()
+                y_claw = torch.squeeze(y_claw).cuda()
 
-            self._model.init_hidden()
-            out_vel, out_claw = self._model(X_img, X_coords)
+                self._model.init_hidden()
+                out_vel, out_claw = self._model(X_img, X_coords)
+                loss_vel = self.vel_criterion(out_vel, y_vel)
+                loss_claw = self.claw_criterion(out_claw, y_claw)
+                loss += loss_vel.item() + loss_claw.item()
 
-            loss_vel = self.vel_criterion(out_vel, y_vel)
-            loss_claw = self.claw_criterion(out_claw, y_claw)
-            loss += loss_vel + loss_claw
+                print('Calculating %s loss: %0.1f%%, time: %s%s' % (phase, 
+                    (float(i + 1) / self._dataset_sizes[phase]) * 100, self.get_time(time.time() - since), 
+                    ' ' * 20), end='\r')
+                sys.stdout.flush()
 
-            print('Calculating %s loss: %0.1f%%, time: %s%s' % (phase, 
-                (float(i + 1) / self._dataset_sizes[phase]) * 100, self.get_time(time.time() - since), 
-                ' ' * 20), end='\r')
-            sys.stdout.flush()
-
-        return (loss / self._dataset_sizes[phase]).item()
+        return loss / self._dataset_sizes[phase]
 
     def plot_loss(self, train_loss_list, val_loss_list):
         plt.cla()
