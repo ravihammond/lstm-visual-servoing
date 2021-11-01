@@ -29,6 +29,7 @@ docker run -it \
     --cpus=$cpus \
     --memory=$mem \
     --gpus all \
+    --ipc=host \
     lstm-visual-servoing 
 
 # IP: 10.90.184.11
