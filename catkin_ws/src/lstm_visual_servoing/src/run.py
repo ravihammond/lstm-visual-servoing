@@ -9,12 +9,13 @@ torch.cuda.set_device(2)
 
 # Check validity of model directory
 def check_model_directory(model_dir):
+    print("checking model dir: ", model_dir)
     # Ensures training data directory exists
     if not os.path.exists(model_dir):
         sys.exit("Error: model directory %s does not exist")
 
-    # model_path = os.path.join(model_dir, "model.pt")
     model_path = os.path.join(model_dir, "best_model.pt")
+    print("model path: ", model_path)
 
     # Ensures training data directory exists
     if not os.path.exists(model_path):
