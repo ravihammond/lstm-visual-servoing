@@ -3,7 +3,7 @@ torch.autograd.set_detect_anomaly(True)
 import torch.nn as nn
 import torchvision
 from torchvision import models
-torch.cuda.set_device(2)
+torch.cuda.set_device(0)
 import sys
 
 class LSTMController(nn.Module):

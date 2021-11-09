@@ -8,7 +8,7 @@ from torch.optim import lr_scheduler
 from torch.utils.data import DataLoader
 import torchvision
 from torchvision import datasets, models, transforms
-torch.cuda.set_device(2)
+torch.cuda.set_device(0)
 
 import numpy as np
 import matplotlib.pyplot as plt

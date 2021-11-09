@@ -1,6 +1,6 @@
 <launch>
     <arg name="training"/>
-    <arg name="frames" default="20"/>
+    <arg name="frames" default="2000"/>
     <arg name="prefix"/>
     <node pkg="lstm_visual_servoing" name="record" type="record.py" output="screen"
           args="-t $(arg training) -f $(arg frames) -p $(arg prefix)" />
