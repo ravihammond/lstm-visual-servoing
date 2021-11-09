@@ -1,3 +1,4 @@
-roslaunch lstm_visual_servoing record.launch training:="pickup_place_clean" prefix:="start"
-roslaunch lstm_visual_servoing pickup_drop.launch model:="pickup_place_clean"
-python3 train.py ~/catkin_ws/training_data/pickup_place_clean/ ~/catkin_ws/models/fast_cleaning
+roslaunch lstm_visual_servoing record.launch training:="pickup_drop" prefix:="start"
+roslaunch lstm_visual_servoing pickup_drop.launch model:="pickup_drop"
+python3 train.py ~/catkin_ws/training_data/fast_cleaning/ ~/catkin_ws/models/fast_cleaning_
+

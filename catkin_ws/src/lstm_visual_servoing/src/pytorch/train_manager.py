@@ -20,7 +20,8 @@ import sys
 import pprint
 
 from .dataset import SequenceDataset
-from .model import LSTMController
+# from .model import LSTMController
+from .model_cnnlayer import LSTMController
 from .control_loss import ControlLoss
 
 class TrainManager():
@@ -34,15 +35,16 @@ class TrainManager():
         self._num_workers = 4
         self._lr = 0.0001
         self._hidden_dim = 2000
-        self._middle_out_dim = 500
+        # self._middle_out_dim = 5
+        self._channels = 4
         self._pref_seq_length = 700
         self._avg_pool = False
-        self._lstm_layers = 2
+        self._lstm_layers = 1
 
-        self._plot_title = "seqlen: %d, layers: %d, h: %d, lr: %f, mid: %d" % (
+        self._plot_title = "seqlen: %d, layers: %d, h: %d, lr: %f, channels: %d" % (
                 self._pref_seq_length, self._lstm_layers,
-                self._hidden_dim, self._lr, self._middle_out_dim)
-        self._model = LSTMController(self._hidden_dim, self._middle_out_dim,
+                self._hidden_dim, self._lr, self._channels)
+        self._model = LSTMController(self._hidden_dim, self._channels,
                 self._avg_pool, self._lstm_layers).cuda()
         self._dataloaders = {}
         self._dataset_sizes = {}
@@ -76,9 +78,7 @@ class TrainManager():
             self._dataset_sizes[x] = self._dataloaders[x].dataset.__len__()
 
     def train_model(self):
-        # self.vel_criterion = nn.MSELoss()
         self.vel_criterion = ControlLoss()
-        # self.claw_criterion = nn.MSELoss()
         self.claw_criterion = nn.MSELoss()
 
         optimizer = optim.Adam(filter(lambda p: p.requires_grad, self._model.parameters()), lr=self._lr)
@@ -107,6 +107,7 @@ class TrainManager():
                 self._model.init_hidden()
                             
                 out_vel, out_claw = self._model(X_img, X_coords)
+                out_claw = out_claw.squeeze()
 
                 loss_vel = self.vel_criterion(out_vel, y_vel)
                 loss_claw = self.claw_criterion(out_claw, y_claw)
@@ -153,6 +154,7 @@ class TrainManager():
 
                 self._model.init_hidden()
                 out_vel, out_claw = self._model(X_img, X_coords)
+                out_claw = out_claw.squeeze()
                 loss_vel = self.vel_criterion(out_vel, y_vel)
                 loss_claw = self.claw_criterion(out_claw, y_claw)
                 loss += loss_vel.item() + loss_claw.item()

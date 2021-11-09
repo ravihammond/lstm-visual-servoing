@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 import torch
-torch.cuda.set_device(0)
+torch.cuda.set_device(2)
 
 # map_location='cuda:0'
 import rospy

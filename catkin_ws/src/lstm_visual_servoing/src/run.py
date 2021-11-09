@@ -5,7 +5,7 @@ import os
 
 from pytorch import VisualServo
 import torch
-torch.cuda.set_device(0)
+torch.cuda.set_device(2)
 
 # Check validity of model directory
 def check_model_directory(model_dir):
